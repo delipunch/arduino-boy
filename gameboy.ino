@@ -2,9 +2,9 @@
 #include "pokemon.h"
 #include "output.h"
 
-#define MOSI_ 22
-#define MISO_ 23
-#define SCLK_ 24
+#define MOSI_ 0
+#define MISO_ 1
+#define SCLK_ 2
 
 int bytes = 0;
 uint8_t shift = 0;
@@ -26,36 +26,36 @@ void transferBit(void) {
         shift = 0;
         bytes++;
         out_data = handleIncomingByte(in_data);
-        //Serial.print(bytes);
-        //Serial.print(" ");
-        Serial.print(trade_centre_state);
-        Serial.print(" ");
-        Serial.print(in_data, HEX);
-        Serial.print(" ");
-        Serial.print(out_data, HEX);
-        Serial.print("\n");
+        ////.print(bytes);
+        ////.print(" ");
+        //.print(trade_centre_state);
+        //.print(" ");
+        //.print(in_data, HEX);
+        //.print(" ");
+        //.print(out_data, HEX);
+        //.print("\n");
         in_data = 0;
     }
     
     while(!digitalRead(SCLK_));
-    //Serial.print(out_data & 0x80 ? HIGH : LOW);
+    ////.print(out_data & 0x80 ? HIGH : LOW);
     digitalWrite(MOSI_, out_data & 0x80 ? HIGH : LOW);
     out_data <<= 1;
 }
 
 void setup() {
-    Serial.begin(115200);
+    //.begin(115200);
     pinMode(SCLK_, INPUT);
     pinMode(MISO_, INPUT);
     pinMode(MOSI_, OUTPUT);
     
-    Serial.print("hello world\n");
+    //.print("hello world\n");
     
     for (int i=0; i<44+11+11; i++) {
-      Serial.print(" ");
-      Serial.print(EEPROM.read(i), HEX);
+      //.print(" ");
+      //.print(EEPROM.read(i), HEX);
     }
-    Serial.print("\n");
+    //.print("\n");
     
     digitalWrite(MOSI_, LOW);
     out_data <<= 1;
@@ -67,7 +67,7 @@ void loop() {
     while(digitalRead(SCLK_)) {
       if (micros() - last_bit > 1000000) {
         // the Game Boy is silent. A good time to do book keeping.
-        Serial.print("idle\n");
+        //.print("idle\n");
         last_bit = micros();
         shift = 0;
         in_data = 0;
@@ -75,27 +75,27 @@ void loop() {
           // a trade has been confrimed
           int i;
           int start = 19 + (trade_pokemon * 44);
-          for (i=0; i<44; i++) {
+          for (i=0; i<48; i++) {
             EEPROM.write(i, INPUT_BLOCK[start+i]);
-            Serial.print(" ");
-            Serial.print(INPUT_BLOCK[start+i], HEX);
+            //.print(" ");
+            //.print(INPUT_BLOCK[start+i], HEX);
           }
-          Serial.print("\nOT\n");
+          //.print("\nOT\n");
           start = 283 + (trade_pokemon * 11);
           for (i=0; i<11; i++) {
-            EEPROM.write(i+44, INPUT_BLOCK[start+i]);
-            Serial.print(" ");
-            Serial.print(INPUT_BLOCK[start+i], HEX);
+            EEPROM.write(i+48, INPUT_BLOCK[start+i]);
+            //.print(" ");
+            //.print(INPUT_BLOCK[start+i], HEX);
           }
-          Serial.print("\nnick\n");
+          //.print("\nnick\n");
           start = 349 + (trade_pokemon * 11);
           for (i=0; i<11; i++) {
-            EEPROM.write(i+44+11, INPUT_BLOCK[start+i]);
-            Serial.print(" ");
-            Serial.print(INPUT_BLOCK[start+i], HEX);
+            EEPROM.write(i+48+11, INPUT_BLOCK[start+i]);
+            //.print(" ");
+            //.print(INPUT_BLOCK[start+i], HEX);
           }
           trade_pokemon = -1;
-          Serial.print("\ntrade saved\n");
+          //.print("\ntrade saved\n");
         }
       }
     }
@@ -214,4 +214,3 @@ byte handleIncomingByte(byte in) {
 
   return send;
 }
-
